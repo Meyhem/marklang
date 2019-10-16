@@ -1,3 +1,4 @@
+mod sparse;
 
 use rand::prelude::*;
 
@@ -9,7 +10,8 @@ struct ProbCell {
 
 struct MarkovLanguageGenerator {
     grams: Vec<String>,
-    mat: Vec<Vec<ProbCell>>,
+    // matrix: sparse::SparseMatrix<String>,
+    mat: sparse::SparseMatrix<'a, ProbCell>,
     rng: rand::rngs::ThreadRng,
     ngram: usize
 }
@@ -17,6 +19,7 @@ struct MarkovLanguageGenerator {
 impl MarkovLanguageGenerator {
     pub fn new(ngram: usize) -> MarkovLanguageGenerator {
         return MarkovLanguageGenerator {
+            // matrix: sparse::SparseMatrix::new(),
             grams: vec![],
             mat: vec![vec![ProbCell{prob: 0.0, count: 0}; 0]; 0],
             rng: rand::thread_rng(),
