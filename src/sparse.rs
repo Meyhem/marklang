@@ -6,26 +6,15 @@ struct Triple<T> {
 }
 
 pub struct SparseMatrix<T> {
-    triples: Vec<Triple<T>>,
-    max_rows: usize,
-    max_cols: usize
+    triples: Vec<Triple<T>>
 }
 
 impl<T: Copy> SparseMatrix<T> {
     pub fn new() -> Self {
         SparseMatrix {
             triples: Vec::new(),
-            max_rows: 0,
-            max_cols: 0
+
         }
-    }
-
-    pub fn rows(&self) -> usize {
-        self.max_rows
-    }
-
-    pub fn cols(&self) -> usize {
-        self.max_cols
     }
 
     pub fn get(&self, row: usize, col: usize) -> Option<T> {
@@ -33,13 +22,6 @@ impl<T: Copy> SparseMatrix<T> {
     }
 
     pub fn put(&mut self, row: usize, col: usize, value: T) {
-        if self.max_rows < row {
-            self.max_rows = row;
-        }
-        if self.max_cols < col {
-            self.max_cols = col;
-        }
-
         let cell = self.triples.iter_mut().find(|t| t.row == row && t.col == col);
         match cell {
             Some(v) => {
