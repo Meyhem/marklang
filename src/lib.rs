@@ -7,15 +7,14 @@ pub mod prelude {
 use rand::prelude::*;
 
 #[derive(Copy, Clone, Debug)]
-struct ProbCell {
+pub struct ProbCell {
     prob: f32,
     count: usize
 }
 
 pub struct MarkovLanguageGenerator {
-    grams: Vec<String>,
-    // matrix: sparse::SparseMatrix<String>,
-    mat: sparse::SparseMatrix<ProbCell>,
+    pub grams: Vec<String>,
+    pub mat: sparse::SparseMatrix<ProbCell>,
     rng: rand::rngs::ThreadRng,
     ngram: usize
 }
@@ -42,7 +41,7 @@ impl MarkovLanguageGenerator {
             return Err("Text size must be at least 2*ngram size".to_owned());
         }
 
-        for i in 0..n_chars - self.ngram * 2 {
+        for i in (0..n_chars - self.ngram * 2).step_by(self.ngram) {
             let gram1 = &chars[i..i + self.ngram];
             let gram2 = &chars[i + self.ngram..i + self.ngram * 2];
             let c1_i = self.get_or_insert_ngram_index(gram1.iter().collect());
@@ -87,6 +86,7 @@ impl MarkovLanguageGenerator {
     pub fn gen(&mut self, len: usize) -> Result<String, String> {
         let mut buf = String::with_capacity(len);
         let mut current = self.grams[self.rng.next_u64() as usize % self.grams.len()].clone();
+
         while buf.len() < len {
             let dest_prob = self.rng.gen_range(0f32, 1f32);
             buf.push_str(&current);
