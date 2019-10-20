@@ -31,12 +31,17 @@ impl MarkovLanguageGenerator {
         }
     }
 
+    pub fn fit_str(&mut self, s: &str) -> Result<(), String> {
+        self.fit(&s.to_owned())
+    }
+
     pub fn fit(&mut self, s: &String) -> Result<(), String> {
         let chars = s.chars().collect::<Vec<char>>();
         let n_chars = chars.iter().count();
         if n_chars < 2*self.ngram {
             return Err("Text size must be at least 2*ngram size".to_owned());
         }
+
         for i in 0..n_chars - self.ngram * 2 {
             let gram1 = &chars[i..i + self.ngram];
             let gram2 = &chars[i + self.ngram..i + self.ngram * 2];
@@ -82,7 +87,7 @@ impl MarkovLanguageGenerator {
     pub fn gen(&mut self, len: usize) -> Result<String, String> {
         let mut buf = String::with_capacity(len);
         let mut current = self.grams[self.rng.next_u64() as usize % self.grams.len()].clone();
-        for _ in 0..len {
+        while buf.len() < len {
             let dest_prob = self.rng.gen_range(0f32, 1f32);
             buf.push_str(&current);
             let mut cummulative_prob = 0f32;
@@ -101,6 +106,7 @@ impl MarkovLanguageGenerator {
                 break;
             }
         }
+        buf.truncate(len);
         Ok(buf)
     }
 }
