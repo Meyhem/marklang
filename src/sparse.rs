@@ -1,19 +1,18 @@
 #[derive(Debug)]
-struct Triple<T> {
-    row: usize,
-    col: usize,
-    value: T
+pub struct Triple<T> {
+    pub row: usize,
+    pub col: usize,
+    pub value: T
 }
 
 pub struct SparseMatrix<T> {
-    triples: Vec<Triple<T>>
+    pub triples: Vec<Triple<T>>
 }
 
 impl<T: Copy> SparseMatrix<T> {
     pub fn new() -> Self {
         SparseMatrix {
             triples: Vec::new(),
-
         }
     }
 
@@ -34,12 +33,12 @@ impl<T: Copy> SparseMatrix<T> {
         }
     }
 
-    pub fn iter_row(&self, row: usize) -> impl Iterator<Item = T> + '_ {
+    pub fn iter_row(&self, row: usize) -> impl Iterator<Item = &Triple<T>> + '_ {
         self.triples
             .iter()
             .skip_while(move |t| t.row != row)
             .take_while(move |t| t.row == row)
-            .map(|t| t.value)
+            .map(|t| t)
     }
 
     pub fn row_for_each<F>(&mut self, row: usize, mut f: F) where F: FnMut(&mut T)  {
@@ -73,7 +72,7 @@ mod tests {
         sm.put(1, 1, TestType { val: 3 });
         sm.row_for_each(0, |v| v.val = 1000);
 
-        assert_eq!(sm.iter_row(0).collect::<Vec<TestType>>(), vec![TestType { val: 1000 }, TestType { val: 1000 }]);
+        assert_eq!(sm.iter_row(0).map(|t| t.value).collect::<Vec<TestType>>(), vec![TestType { val: 1000 }, TestType { val: 1000 }]);
     }
 
     #[test]
@@ -102,7 +101,7 @@ mod tests {
 
         sm.put(0, 2, 2);
 
-        let row: Vec<u32> = sm.iter_row(0).collect();
+        let row: Vec<u32> = sm.iter_row(0).map(|t| t.value).collect();
 
         assert_eq!(row, vec![0, 0, 2]);
     }

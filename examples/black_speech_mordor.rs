@@ -5,7 +5,7 @@ use marklang::MarkovLanguageGenerator;
 use regex::Regex;
 
 fn main() {
-    let mut g = MarkovLanguageGenerator::new(1);
+    let mut g = MarkovLanguageGenerator::new(2);
     let non_alpha = Regex::from_str("[^a-z]").unwrap();
     let mut black_speech = "
     Atigat was a khlaarum ob thag leaves outside. The dhuzud claim got the dath verdict.
@@ -44,9 +44,9 @@ fn main() {
     let replaced = non_alpha.replace_all(black_speech, "").to_owned();
     black_speech = &replaced;
 
-    g.fit_str(black_speech);
+    g.fit_str(black_speech).unwrap();
 
-    for i in 0..100 {
-        println!("{:?}", g.gen(i % 9 + 1));
+    for _ in 0..100 {
+        println!("{:?}", g.gen(8));
     }
 }

@@ -13,8 +13,8 @@ pub struct ProbCell {
 }
 
 pub struct MarkovLanguageGenerator {
-    pub grams: Vec<String>,
-    pub mat: sparse::SparseMatrix<ProbCell>,
+    grams: Vec<String>,
+    mat: sparse::SparseMatrix<ProbCell>,
     rng: rand::rngs::ThreadRng,
     ngram: usize
 }
@@ -35,15 +35,22 @@ impl MarkovLanguageGenerator {
     }
 
     pub fn fit(&mut self, s: &String) -> Result<(), String> {
-        let chars = s.chars().collect::<Vec<char>>();
-        let n_chars = chars.iter().count();
-        if n_chars < 2*self.ngram {
-            return Err("Text size must be at least 2*ngram size".to_owned());
+        if s.chars().count() < self.ngram {
+            return Err("Text size must be at least ngram size".to_owned());
         }
 
-        for i in (0..n_chars - self.ngram * 2).step_by(self.ngram) {
+        let mut chars = s.chars().collect::<Vec<char>>();
+        let mut prefix = chars.iter()
+            .take(self.ngram - 1)
+            .map(|&c| c)
+            .collect::<Vec<char>>();
+
+        chars.append(&mut prefix);
+        let n_chars = chars.len();
+
+        for i in 0..n_chars - self.ngram {
             let gram1 = &chars[i..i + self.ngram];
-            let gram2 = &chars[i + self.ngram..i + self.ngram * 2];
+            let gram2 = &chars[i + 1..i + self.ngram + 1];
             let c1_i = self.get_or_insert_ngram_index(gram1.iter().collect());
             let c2_i = self.get_or_insert_ngram_index(gram2.iter().collect());
             match self.mat.get(c1_i, c2_i) {
@@ -62,7 +69,7 @@ impl MarkovLanguageGenerator {
 
     pub fn adjust_probs(&mut self) {
         for r in 0..self.grams.len() {
-            let row_total = self.mat.iter_row(r).fold(0usize, |sum, v| sum + v.count);
+            let row_total = self.mat.iter_row(r).fold(0usize, |sum, v| sum + v.value.count);
             self.mat.row_for_each(r, |cell| {
                 if row_total == 0 {
                     cell.prob = 0f32;
@@ -89,17 +96,19 @@ impl MarkovLanguageGenerator {
 
         while buf.len() < len {
             let dest_prob = self.rng.gen_range(0f32, 1f32);
-            buf.push_str(&current);
+            buf.push_str(&current[0..1]);
             let mut cummulative_prob = 0f32;
-            let mut index = 0;
             let row_i = self.get_or_insert_ngram_index(current);
-            for cell in self.mat.iter_row(row_i) {
-                cummulative_prob += cell.prob;
+            let mut index = 0;
+
+            for triple in self.mat.iter_row(row_i) {
+                cummulative_prob += triple.value.prob;
+                index = triple.col;
                 if cummulative_prob >= dest_prob {
                     break;
                 }
-                index += 1;
             }
+
             if index < self.grams.len() {
                 current = self.grams[index].clone();
             } else {
@@ -129,7 +138,7 @@ mod tests {
     fn test_fit_ngram_len_validation() {
         let mut generator = MarkovLanguageGenerator::new(5);
 
-        assert_eq!(generator.fit(&"abc".to_owned()), Err("Text size must be at least 2*ngram size".to_owned()));
+        assert_eq!(generator.fit(&"abc".to_owned()), Err("Text size must be at least ngram size".to_owned()));
     }
 
     #[test]
@@ -137,7 +146,7 @@ mod tests {
         let mut generator = MarkovLanguageGenerator::new(3);
         generator.fit(&"helloo".to_owned()).unwrap();
         generator.fit(&"hellooooo".to_owned()).unwrap();
-        generator.fit(&"hello".to_owned()).unwrap_err();
+        generator.fit(&"hello".to_owned()).unwrap();
     }
 
     #[test]
