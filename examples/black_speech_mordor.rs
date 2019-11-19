@@ -47,6 +47,6 @@ fn main() {
     g.fit_str(black_speech).unwrap();
 
     for _ in 0..100 {
-        println!("{:?}", g.gen(8));
+        print!("{} ", g.gen(8).unwrap());
     }
 }
