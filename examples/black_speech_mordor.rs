@@ -49,4 +49,5 @@ fn main() {
     for _ in 0..100 {
         print!("{} ", g.gen(8).unwrap());
     }
+    println!();
 }
