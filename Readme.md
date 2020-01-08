@@ -8,7 +8,7 @@ We want to to be able to take existing language (words & sentences), and be able
 A simple representation of markov chain is similar to state machine, however this chain does not accept sequences, but generates them. Node contains ngram (in the picture an unigram) and edge weights are probabilities of follow up ngrams. By rolling dice each step and choosing path we can walk trough the model and generate letters.
 
 <figure>
-  <img class="article-image" src="{% link assets/images/markov_machine.png %}" width="40%" alt="Simple markov chain">
+  <img class="article-image" src="https://raw.githubusercontent.com/Meyhem/marklang/readme-assets-branch/markov_machine.png" width="40%" alt="Simple markov chain">
 </figure>
 
 If we start at _Node A_ then we have 100% probability we will take path to _Node B_ which means that every letter __A__ will be followed by letter __B__. Not very practical in language, but lets continue.  
@@ -148,4 +148,3 @@ fineobje amesfaid iavavopr tporavop lnodangw wshuzudc izamukgr nkuklaav gajoravr
 ## sources
 * [Black speech translator](https://lingojam.com/BlackSpeechTranslator)
 * [Markov chain - Wikipedia](https://en.wikipedia.org/wiki/Markov_chain)
-* [Github repository](https://github.com/Meyhem/marklang)
